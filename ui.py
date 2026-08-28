@@ -13,7 +13,7 @@ BORDER = "#665c54"
 class KansuUI:
     def __init__(self):
         self.root = tk.Tk()
-        self.root.title("Kansu")
+        self.root.title("kansu")
         self.root.geometry("800x600")
         self.root.minsize(600, 450)
         self.root.configure(bg=BG)
@@ -75,15 +75,6 @@ class KansuUI:
             pady=(10, 0),
         )
         self.header.pack_propagate(False)
-
-        self.header_left = tk.Label(
-            self.header,
-            text="kansu",
-            bg=BG,
-            fg=FG,
-            font=self.title_font,
-        )
-        self.header_left.pack(side="left")
 
         self.header_right = tk.Label(
             self.header,
@@ -199,7 +190,7 @@ class KansuUI:
 
         tk.Label(
             container,
-            text="kansu",
+            text="kansu | カンス",
             bg=BG,
             fg=FG,
             font=self.title_font,
@@ -214,7 +205,9 @@ class KansuUI:
                 fg=FG,
                 font=self.text_font,
                 width=20,
-                anchor="w",
+                anchor="center",
+                highlightthickness=0,
+                bd=0,
             )
             label.pack(pady=5)
             self.menu_labels.append(label)
@@ -223,7 +216,6 @@ class KansuUI:
 
         self.set_footer(
             "↑ ↓ navigate    enter select",
-            "q quit",
         )
 
         self.root.bind("<Up>", self.menu_up)
@@ -241,7 +233,7 @@ class KansuUI:
 
         for i, label in enumerate(self.menu_labels):
             label.config(
-                text=f"{'> ' if i == self.menu_index else '  '}{items[i]}",
+                text=f"> {items[i]}" if i == self.menu_index else f"  {items[i]}",
                 fg=ACCENT if i == self.menu_index else FG,
             )
 
@@ -390,6 +382,7 @@ class KansuUI:
             highlightcolor=ACCENT,
             font=self.text_font,
             width=30,
+            justify="center",
         )
         entry.pack(ipady=5)
         entry.focus_set()
@@ -469,7 +462,7 @@ class KansuUI:
 
         self.set_footer(
             "",
-            "backspace back    q quit",
+            "backspace back",
         )
 
         self.root.bind(

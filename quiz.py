@@ -2,39 +2,72 @@ import random
 
 from database import get_all_kanji
 from fsrs import Rating
-from srs import review_card
+
+from srs import is_due, load_card, review_card
 
 
 class QuizScreen:
     def __init__(self, ui):
         self.ui = ui
         self.kanji_list = get_all_kanji()
-        self.kanji = None
+        self.previous_id = None
 
         if not self.kanji_list:
-            ui.show_review_result("No kanji found.")
+            self.ui.back()
             return
 
         self.next_question()
 
-    def next_question(self):
-        available = [
-            kanji
-            for kanji in self.kanji_list
-            if self.kanji is None or kanji["id"] != self.kanji["id"]
-        ]
+    def get_candidates(self):
+        new_cards = []
+        due_cards = []
+        future_cards = []
 
-        self.kanji = random.choice(available)
+        for kanji in self.kanji_list:
+            card = load_card("kanji", kanji["id"])
+
+            if card.reps == 0:
+                new_cards.append(kanji)
+            elif is_due(card):
+                due_cards.append(kanji)
+            else:
+                future_cards.append(kanji)
+
+        return new_cards, due_cards, future_cards
+
+    def choose_kanji(self):
+        new_cards, due_cards, future_cards = self.get_candidates()
+
+        candidates = due_cards + new_cards
+
+        if not candidates:
+            candidates = future_cards
+
+        if len(candidates) > 1:
+            candidates = [
+                kanji
+                for kanji in candidates
+                if kanji["id"] != self.previous_id
+            ]
+
+        kanji = random.choice(candidates)
+        self.previous_id = kanji["id"]
+
+        return kanji
+
+    def next_question(self):
+        kanji = self.choose_kanji()
+        self.current_kanji = kanji
 
         self.ui.show_quiz(
-            self.kanji,
-            self.submit,
+            kanji,
+            self.submit_answer,
         )
 
-    def submit(self, answer):
+    def submit_answer(self, answer):
         correct_answers = [
             meaning.strip().lower()
-            for meaning in self.kanji["meaning"].split("/")
+            for meaning in self.current_kanji["meaning"].split("/")
         ]
 
         correct = answer.strip().lower() in correct_answers
@@ -42,14 +75,14 @@ class QuizScreen:
         self.ui.show_quiz_result(
             correct,
             answer,
-            self.kanji["meaning"],
+            self.current_kanji["meaning"],
             self.rate,
         )
 
     def rate(self, rating):
-        review_card(
+        card, _ = review_card(
             "kanji",
-            self.kanji["id"],
+            self.current_kanji["id"],
             Rating(rating),
         )
 
