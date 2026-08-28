@@ -1,5 +1,6 @@
 class SettingsScreen:
-    levels = ["All", "N5", "N4", "N3", "N2", "N1"]
+    levels = ["All", "N5", "N4"]
+    # levels = ["All", "N5", "N4", "N3", "N2", "N1"]
 
     def __init__(self, ui):
         self.ui = ui

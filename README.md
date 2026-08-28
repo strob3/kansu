@@ -1,23 +1,32 @@
 # Kansu
 
-A terminal-based Japanese learning application for studying and practicing kanji and vocabulary.
+A terminal-based Japanese learning application for studying and practicing kanji and related vocabulary on Linux.
 
 ## Features
 
-* N5 kanji
-* N5 vocabulary
-* Kanji meanings and readings
-* Vocabulary meanings and readings
-* Quiz
+* Kanji study and quiz mode
+* N5-N4 kanji (will add more soon)
+* Spaced repetition using FSRS
+* Review statistics
+* Keyboard-centric interface
 
 ## Installation and Usage
 
-* WIP
+Clone the repository and then run the installer:
 
-## Data and License
+```bash
+git clone https://github.com/strob3/kansu.git
+cd kansu
+source install.sh
+```
 
-This project uses Japanese language-learning data from [OpenJLPT](https://github.com/evanclan/OpenJLPT).
+> The installer sets up the Python environment, installs dependencies, imports the available kanji data, and makes the `kansu` command available.
 
-The OpenJLPT data is licensed under the **Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)** license.
+Run:
+```bash
+kansu
+```
 
-See `NOTICE.md` for third-party data attribution and licensing information.
+## License
+
+See `NOTICE.md` for information about third-party data and project notices.
