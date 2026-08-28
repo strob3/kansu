@@ -1,7 +1,9 @@
 # python
 __pycache__/
+*.pyc
+
+# environment
+.venv/
 
 # local database
-kanji.db
-*.sqlite
-*.sqlite3
+src/kanji.db
