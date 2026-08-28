@@ -10,6 +10,10 @@ A terminal-based Japanese learning application for studying and practicing kanji
 * Vocabulary meanings and readings
 * Quiz
 
+## Installation and Usage
+
+* WIP
+
 ## Data and License
 
 This project uses Japanese language-learning data from [OpenJLPT](https://github.com/evanclan/OpenJLPT).
