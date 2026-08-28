@@ -1,41 +1,56 @@
-import curses
 import random
 
 from database import get_all_kanji
-from ui import continue_menu, get_text_input
+from fsrs import Rating
+from srs import review_card
 
 
-def display_quiz(stdscr, kanji):
-    stdscr.clear()
-    _, width = stdscr.getmaxyx()
+class QuizScreen:
+    def __init__(self, ui):
+        self.ui = ui
+        self.kanji_list = get_all_kanji()
+        self.kanji = None
 
-    title = "quiz"
-    stdscr.addstr(2, max(0, (width - len(title)) // 2), title, curses.A_BOLD)
+        if not self.kanji_list:
+            ui.show_review_result("No kanji found.")
+            return
 
-    question = f"What does {kanji['character']} mean?"
-    stdscr.addstr(6, max(0, (width - len(question)) // 2), question)
-    stdscr.addstr(8, 4, "answer:")
-    stdscr.refresh()
+        self.next_question()
 
-    return get_text_input(stdscr, 10, 4)
-
-
-def quiz_mode(stdscr):
-    kanji_list = get_all_kanji()
-
-    if not kanji_list:
-        return
-
-    while True:
-        kanji = random.choice(kanji_list)
-        answer = display_quiz(stdscr, kanji)
-
-        correct_answers = [
-            meaning.strip().lower()
-            for meaning in kanji["meaning"].split("/")
+    def next_question(self):
+        available = [
+            kanji
+            for kanji in self.kanji_list
+            if self.kanji is None or kanji["id"] != self.kanji["id"]
         ]
 
-        result = "✓" if answer.lower() in correct_answers else f"✗ answer: {kanji['meaning']}"
+        self.kanji = random.choice(available)
 
-        if continue_menu(stdscr, result) == 1:
-            return
+        self.ui.show_quiz(
+            self.kanji,
+            self.submit,
+        )
+
+    def submit(self, answer):
+        correct_answers = [
+            meaning.strip().lower()
+            for meaning in self.kanji["meaning"].split("/")
+        ]
+
+        correct = answer.strip().lower() in correct_answers
+
+        self.ui.show_quiz_result(
+            correct,
+            answer,
+            self.kanji["meaning"],
+            self.rate,
+        )
+
+    def rate(self, rating):
+        review_card(
+            "kanji",
+            self.kanji["id"],
+            Rating(rating),
+        )
+
+        self.next_question()

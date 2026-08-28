@@ -14,6 +14,7 @@ def get_connection():
 # sql shits
 def initialize_database():
     connection = get_connection()
+    
     cursor = connection.cursor()
 
     cursor.execute("""
@@ -52,12 +53,23 @@ def initialize_database():
         )
     """)
 
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS srs_cards (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            item_type TEXT NOT NULL,
+            item_id INTEGER NOT NULL,
+            card TEXT NOT NULL,
+            UNIQUE (item_type, item_id)
+        )
+    """)
+
     connection.commit()
     connection.close()
 
 
 def add_kanji(character, meaning, onyomi=None, kunyomi=None, level=None, strokes=None, grade=None):
     connection = get_connection()
+
     cursor = connection.cursor()
 
     cursor.execute("""
@@ -84,6 +96,7 @@ def add_kanji(character, meaning, onyomi=None, kunyomi=None, level=None, strokes
 
 def add_vocabulary(word, reading, meaning, level=None, kanji_id=None):
     connection = get_connection()
+
     cursor = connection.cursor()
 
     cursor.execute("""
@@ -108,6 +121,7 @@ def add_vocabulary(word, reading, meaning, level=None, kanji_id=None):
 
 def add_example(vocabulary_id, japanese, english):
     connection = get_connection()
+
     cursor = connection.cursor()
 
     cursor.execute("""
@@ -121,6 +135,7 @@ def add_example(vocabulary_id, japanese, english):
 
 def get_all_kanji():
     connection = get_connection()
+
     rows = connection.execute("""
         SELECT id, character, meaning, onyomi, kunyomi, level, strokes, grade
         FROM kanji
@@ -132,6 +147,7 @@ def get_all_kanji():
 
 def get_vocabulary(kanji_id):
     connection = get_connection()
+
     rows = connection.execute("""
         SELECT id, word, reading, meaning, level
         FROM vocabulary
@@ -144,6 +160,7 @@ def get_vocabulary(kanji_id):
 
 def get_all_vocabulary():
     connection = get_connection()
+
     rows = connection.execute("""
         SELECT id, word, reading, meaning, level, kanji_id
         FROM vocabulary
@@ -155,6 +172,7 @@ def get_all_vocabulary():
 
 def get_examples(vocabulary_id):
     connection = get_connection()
+
     rows = connection.execute("""
         SELECT id, japanese, english
         FROM examples
@@ -162,3 +180,28 @@ def get_examples(vocabulary_id):
     """, (vocabulary_id,)).fetchall()
     connection.close()
     return rows
+
+
+def get_srs_card(item_type, item_id):
+    connection = get_connection()
+    row = connection.execute("""
+        SELECT card
+        FROM srs_cards
+        WHERE item_type = ? AND item_id = ?
+    """, (item_type, item_id)).fetchone()
+    connection.close()
+    return row["card"] if row else None
+
+
+def save_srs_card(item_type, item_id, card):
+    connection = get_connection()
+
+    connection.execute("""
+        INSERT INTO srs_cards (item_type, item_id, card)
+        VALUES (?, ?, ?)
+        ON CONFLICT(item_type, item_id) DO UPDATE SET
+            card = excluded.card
+    """, (item_type, item_id, card))
+
+    connection.commit()
+    connection.close()
