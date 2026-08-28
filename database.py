@@ -1,7 +1,8 @@
+from pathlib import Path
 import sqlite3
 
 
-DATABASE = "kanji.db"
+DATABASE = Path(__file__).resolve().parent / "kanji.db"
 
 
 def get_connection():
@@ -10,6 +11,7 @@ def get_connection():
     return connection
 
 
+# sql shits
 def initialize_database():
     connection = get_connection()
     cursor = connection.cursor()
@@ -30,15 +32,23 @@ def initialize_database():
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS vocabulary (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            kanji_id INTEGER NOT NULL,
-            word TEXT NOT NULL,
-            reading TEXT NOT NULL,
+            kanji_id INTEGER,
+            word TEXT NOT NULL UNIQUE,
+            reading TEXT,
             meaning TEXT NOT NULL,
+            level TEXT,
+            FOREIGN KEY (kanji_id) REFERENCES kanji(id)
+        )
+    """)
 
-            FOREIGN KEY (kanji_id)
-                REFERENCES kanji(id),
-
-            UNIQUE (kanji_id, word)
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS examples (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            vocabulary_id INTEGER NOT NULL,
+            japanese TEXT NOT NULL,
+            english TEXT NOT NULL,
+            FOREIGN KEY (vocabulary_id) REFERENCES vocabulary(id),
+            UNIQUE (vocabulary_id, japanese)
         )
     """)
 
@@ -46,30 +56,13 @@ def initialize_database():
     connection.close()
 
 
-def add_kanji(
-    character,
-    meaning,
-    onyomi=None,
-    kunyomi=None,
-    level=None,
-    strokes=None,
-    grade=None,
-):
+def add_kanji(character, meaning, onyomi=None, kunyomi=None, level=None, strokes=None, grade=None):
     connection = get_connection()
     cursor = connection.cursor()
 
     cursor.execute("""
-        INSERT INTO kanji (
-            character,
-            meaning,
-            onyomi,
-            kunyomi,
-            level,
-            strokes,
-            grade
-        )
+        INSERT INTO kanji (character, meaning, onyomi, kunyomi, level, strokes, grade)
         VALUES (?, ?, ?, ?, ?, ?, ?)
-
         ON CONFLICT(character) DO UPDATE SET
             meaning = excluded.meaning,
             onyomi = excluded.onyomi,
@@ -77,56 +70,50 @@ def add_kanji(
             level = excluded.level,
             strokes = excluded.strokes,
             grade = excluded.grade
-    """, (
-        character,
-        meaning,
-        onyomi,
-        kunyomi,
-        level,
-        strokes,
-        grade,
-    ))
+    """, (character, meaning, onyomi, kunyomi, level, strokes, grade))
 
     connection.commit()
 
-    kanji_id = cursor.execute("""
-        SELECT id
-        FROM kanji
-        WHERE character = ?
-    """, (character,)).fetchone()["id"]
+    kanji_id = cursor.execute(
+        "SELECT id FROM kanji WHERE character = ?", (character,)
+    ).fetchone()["id"]
 
     connection.close()
-
     return kanji_id
 
 
-def add_vocabulary(
-    kanji_id,
-    word,
-    reading,
-    meaning,
-):
+def add_vocabulary(word, reading, meaning, level=None, kanji_id=None):
     connection = get_connection()
     cursor = connection.cursor()
 
     cursor.execute("""
-        INSERT INTO vocabulary (
-            kanji_id,
-            word,
-            reading,
-            meaning
-        )
-        VALUES (?, ?, ?, ?)
-
-        ON CONFLICT(kanji_id, word) DO UPDATE SET
+        INSERT INTO vocabulary (word, reading, meaning, level, kanji_id)
+        VALUES (?, ?, ?, ?, ?)
+        ON CONFLICT(word) DO UPDATE SET
             reading = excluded.reading,
-            meaning = excluded.meaning
-    """, (
-        kanji_id,
-        word,
-        reading,
-        meaning,
-    ))
+            meaning = excluded.meaning,
+            level = excluded.level,
+            kanji_id = excluded.kanji_id
+    """, (word, reading, meaning, level, kanji_id))
+
+    connection.commit()
+
+    vocabulary_id = cursor.execute(
+        "SELECT id FROM vocabulary WHERE word = ?", (word,)
+    ).fetchone()["id"]
+
+    connection.close()
+    return vocabulary_id
+
+
+def add_example(vocabulary_id, japanese, english):
+    connection = get_connection()
+    cursor = connection.cursor()
+
+    cursor.execute("""
+        INSERT OR IGNORE INTO examples (vocabulary_id, japanese, english)
+        VALUES (?, ?, ?)
+    """, (vocabulary_id, japanese, english))
 
     connection.commit()
     connection.close()
@@ -134,46 +121,44 @@ def add_vocabulary(
 
 def get_all_kanji():
     connection = get_connection()
-    cursor = connection.cursor()
-
-    cursor.execute("""
-        SELECT
-            id,
-            character,
-            meaning,
-            onyomi,
-            kunyomi,
-            level,
-            strokes,
-            grade
+    rows = connection.execute("""
+        SELECT id, character, meaning, onyomi, kunyomi, level, strokes, grade
         FROM kanji
         ORDER BY character
-    """)
-
-    rows = cursor.fetchall()
-
+    """).fetchall()
     connection.close()
-
     return rows
 
 
 def get_vocabulary(kanji_id):
     connection = get_connection()
-    cursor = connection.cursor()
-
-    cursor.execute("""
-        SELECT
-            id,
-            word,
-            reading,
-            meaning
+    rows = connection.execute("""
+        SELECT id, word, reading, meaning, level
         FROM vocabulary
         WHERE kanji_id = ?
         ORDER BY word
-    """, (kanji_id,))
-
-    rows = cursor.fetchall()
-
+    """, (kanji_id,)).fetchall()
     connection.close()
+    return rows
 
+
+def get_all_vocabulary():
+    connection = get_connection()
+    rows = connection.execute("""
+        SELECT id, word, reading, meaning, level, kanji_id
+        FROM vocabulary
+        ORDER BY word
+    """).fetchall()
+    connection.close()
+    return rows
+
+
+def get_examples(vocabulary_id):
+    connection = get_connection()
+    rows = connection.execute("""
+        SELECT id, japanese, english
+        FROM examples
+        WHERE vocabulary_id = ?
+    """, (vocabulary_id,)).fetchall()
+    connection.close()
     return rows

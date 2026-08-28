@@ -1,1 +1,7 @@
-__pycache__
+# python
+__pycache__/
+
+# local database
+kanji.db
+*.sqlite
+*.sqlite3
