@@ -1,6 +1,6 @@
 import random
 
-from database import get_all_kanji, get_vocabulary
+from database import get_kanji_by_level, get_vocabulary
 
 
 def get_kanji_card(kanji):
@@ -19,7 +19,7 @@ def get_kanji_card(kanji):
 class StudyScreen:
     def __init__(self, ui):
         self.ui = ui
-        self.kanji_list = get_all_kanji()
+        self.kanji_list = get_kanji_by_level(ui.nlevel)
         self.index = 0
 
         if not self.kanji_list:

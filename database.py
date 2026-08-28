@@ -205,3 +205,37 @@ def save_srs_card(item_type, item_id, card):
 
     connection.commit()
     connection.close()
+
+
+# review section
+def get_kanji_by_level(level):
+    connection = get_connection()
+
+    if level == "All":
+        rows = connection.execute("""
+            SELECT id, character, meaning, onyomi, kunyomi, level, strokes, grade
+            FROM kanji
+            ORDER BY character
+        """).fetchall()
+    else:
+        rows = connection.execute("""
+            SELECT id, character, meaning, onyomi, kunyomi, level, strokes, grade
+            FROM kanji
+            WHERE level = ?
+            ORDER BY character
+        """, (level,)).fetchall()
+
+    connection.close()
+    return rows
+
+
+def get_all_srs_cards():
+    connection = get_connection()
+
+    rows = connection.execute("""
+        SELECT item_type, item_id, card
+        FROM srs_cards
+    """).fetchall()
+
+    connection.close()
+    return rows

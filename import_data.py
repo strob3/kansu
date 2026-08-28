@@ -1,7 +1,8 @@
 # run only once
-# imports all n5 material only
+# imports kanji material 
 
 import json
+import sys
 import urllib.request
 
 from database import (
@@ -13,22 +14,12 @@ from database import (
 )
 
 
-KANJI_URL = (
-    "https://raw.githubusercontent.com/"
-    "evanclan/OpenJLPT/main/data/json/kanji/n5.json"
-)
-
-VOCABULARY_URL = (
-    "https://raw.githubusercontent.com/"
-    "evanclan/OpenJLPT/main/data/json/vocab/n5.json"
-)
+BASE_URL = "https://raw.githubusercontent.com/evanclan/OpenJLPT/main/data/json"
 
 
 def download_json(url):
     with urllib.request.urlopen(url) as response:
-        data = response.read()
-
-    return json.loads(data)
+        return json.loads(response.read())
 
 
 def import_kanji(data):
@@ -50,11 +41,13 @@ def import_kanji(data):
         )
 
         imported += 1
+
     return imported
 
 
 def build_kanji_lookup():
     kanji_rows = get_all_kanji()
+
     return {
         row["character"]: row["id"]
         for row in kanji_rows
@@ -62,11 +55,6 @@ def build_kanji_lookup():
 
 
 def find_kanji_id(word, kanji_lookup):
-    """
-    Finds the first kanji in a vocabulary word
-    that exists in our kanji database.
-    """
-
     for character in word:
         if character in kanji_lookup:
             return kanji_lookup[character]
@@ -85,19 +73,12 @@ def import_vocabulary(data):
         reading = entry.get("reading", "")
         meanings = entry.get("meanings", [])
 
-        meaning = " / ".join(meanings)
-
-        kanji_id = find_kanji_id(
-            word,
-            kanji_lookup,
-        )
-
         vocabulary_id = add_vocabulary(
             word=word,
             reading=reading,
-            meaning=meaning,
+            meaning=" / ".join(meanings),
             level=entry.get("level"),
-            kanji_id=kanji_id,
+            kanji_id=find_kanji_id(word, kanji_lookup),
         )
 
         for example in entry.get("examples", []):
@@ -110,34 +91,47 @@ def import_vocabulary(data):
                     japanese,
                     english,
                 )
-
                 example_count += 1
 
         imported += 1
+
     return imported, example_count
 
 
 def main():
-    initialize_database()
-    kanji_data = download_json(KANJI_URL)
-    vocabulary_data = download_json(VOCABULARY_URL)
+    level = sys.argv[1].lower() if len(sys.argv) > 1 else "n5"
 
-    print(f"Kanji found:       {len(kanji_data)}")
-    print(f"Vocabulary found:  {len(vocabulary_data)}")
+    if level not in ("n5", "n4"):
+        print("usage: python import_data.py [n5|n4]")
+        return
+
+    initialize_database()
+
+    kanji_url = f"{BASE_URL}/kanji/{level}.json"
+    vocabulary_url = f"{BASE_URL}/vocab/{level}.json"
+
+    print(f"Importing {level.upper()}...")
+    print()
+
+    kanji_data = download_json(kanji_url)
+    vocabulary_data = download_json(vocabulary_url)
+
+    print(f"kanji found:       {len(kanji_data)}")
+    print(f"vocabulary found:  {len(vocabulary_data)}")
     print()
 
     kanji_count = import_kanji(kanji_data)
 
-    print(f"Imported kanji:       {kanji_count}")
+    print(f"imported kanji:       {kanji_count}")
 
     vocabulary_count, example_count = import_vocabulary(
         vocabulary_data
     )
 
-    print(f"Imported vocabulary:  {vocabulary_count}")
-    print(f"Imported examples:    {example_count}")
+    print(f"imported vocabulary:  {vocabulary_count}")
+    print(f"imported examples:    {example_count}")
     print()
-    print("Done")
+    print("done")
 
 
 if __name__ == "__main__":

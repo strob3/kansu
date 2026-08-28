@@ -1,6 +1,6 @@
 import random
 
-from database import get_all_kanji
+from database import get_kanji_by_level
 from fsrs import Rating
 
 from srs import is_due, load_card, review_card
@@ -9,7 +9,7 @@ from srs import is_due, load_card, review_card
 class QuizScreen:
     def __init__(self, ui):
         self.ui = ui
-        self.kanji_list = get_all_kanji()
+        self.kanji_list = get_kanji_by_level(ui.nlevel)
         self.previous_id = None
 
         if not self.kanji_list:

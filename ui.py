@@ -35,6 +35,7 @@ class KansuUI:
         self.screen = "menu"
         self.menu_index = 0
         self.quiz_kanji = ""
+        self.nlevel = "All"
 
         self.root.bind("q", self.handle_q)
         self.root.bind("<BackSpace>", self.handle_backspace)
@@ -198,7 +199,7 @@ class KansuUI:
 
         self.menu_labels = []
 
-        for _ in range(3):
+        for _ in range(5):
             label = tk.Label(
                 container,
                 bg=BG,
@@ -228,6 +229,8 @@ class KansuUI:
         items = [
             "study",
             "quiz",
+            "review",
+            "settings",
             "quit",
         ]
 
@@ -238,20 +241,30 @@ class KansuUI:
             )
 
     def menu_up(self, event=None):
-        self.menu_index = (self.menu_index - 1) % 3
+        self.menu_index = (self.menu_index - 1) % 5
         self.update_menu()
 
     def menu_down(self, event=None):
-        self.menu_index = (self.menu_index + 1) % 3
+        self.menu_index = (self.menu_index + 1) % 5
         self.update_menu()
 
     def menu_select(self, event=None):
         if self.menu_index == 0:
             from study import StudyScreen
             StudyScreen(self)
+
         elif self.menu_index == 1:
             from quiz import QuizScreen
             QuizScreen(self)
+
+        elif self.menu_index == 2:
+            from review import ReviewScreen
+            ReviewScreen(self)
+
+        elif self.menu_index == 3:
+            from settings import SettingsScreen
+            SettingsScreen(self)
+
         else:
             self.quit()
 
@@ -505,6 +518,110 @@ class KansuUI:
             "backspace back",
             "q quit",
         )
+
+
+    def show_settings(
+        self,
+        nlevel,
+        previous,
+        next_level,
+        back,
+    ):
+        self.screen = "settings"
+        self.reset_bindings()
+        self.clear_content()
+
+        self.header_right.config(text="settings")
+
+        content = tk.Frame(
+            self.content,
+            bg=BG,
+        )
+        content.place(
+            relx=0.5,
+            rely=0.45,
+            anchor="center",
+        )
+
+        tk.Label(
+            content,
+            text="settings",
+            bg=BG,
+            fg=FG,
+            font=self.title_font,
+        ).pack(pady=(0, 30))
+
+        tk.Label(
+            content,
+            text=f"n-level       {nlevel}",
+            bg=BG,
+            fg=ACCENT,
+            font=self.text_font,
+        ).pack(pady=5)
+
+        tk.Label(
+            content,
+            text="← → change",
+            bg=BG,
+            fg=MUTED,
+            font=self.text_font,
+        ).pack(pady=(10, 0))
+
+        self.set_footer(
+            "← → change level",
+            "backspace back    q quit",
+        )
+
+        self.root.bind(
+            "<Left>",
+            previous,
+        )
+        self.root.bind(
+            "<Right>",
+            next_level,
+        )
+
+
+    def show_review(self, stats, back):
+        self.screen = "review"
+        self.reset_bindings()
+        self.clear_content()
+
+        self.header_right.config(text="review")
+
+        content = tk.Frame(
+            self.content,
+            bg=BG,
+        )
+        content.place(
+            relx=0.5,
+            rely=0.45,
+            anchor="center",
+        )
+
+        tk.Label(
+            content,
+            text="review",
+            bg=BG,
+            fg=FG,
+            font=self.title_font,
+        ).pack(pady=(0, 25))
+
+        for name in ("due", "new", "learning", "total"):
+            tk.Label(
+                content,
+                text=f"{name:<10}{stats[name]}",
+                bg=BG,
+                fg=FG,
+                font=self.text_font,
+                justify="center",
+            ).pack(pady=3)
+
+        self.set_footer(
+            "backspace back",
+            "q quit",
+        )
+
 
     def back(self, event=None):
         if self.screen != "menu":
