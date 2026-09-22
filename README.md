@@ -1,4 +1,4 @@
-# Kansu
+# Kansu | Currently Broken
 
 A terminal-based Japanese learning application for studying and practicing kanji and related vocabulary on Linux.
 
@@ -10,6 +10,7 @@ A terminal-based Japanese learning application for studying and practicing kanji
 * Review statistics
 * Keyboard-centric interface
 
+<!--
 ## Installation and Usage
 
 Clone the repository and then run the installer:
@@ -26,6 +27,7 @@ Run:
 ```bash
 kansu
 ```
+-->
 
 ## License
 
