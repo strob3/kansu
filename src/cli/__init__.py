@@ -1,0 +1,3 @@
+"""
+Kansu CLI edition package.
+"""

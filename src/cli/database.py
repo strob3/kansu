@@ -1,8 +1,22 @@
+import os
 from pathlib import Path
 import sqlite3
 
 
-DATABASE = Path(__file__).resolve().parent / "kanji.db"
+def _resolve_db_path() -> Path:
+    env_path = os.environ.get("KANJI_DB_PATH")
+    if env_path:
+        return Path(env_path)
+    cli_db = Path(__file__).resolve().parent / "kanji.db"
+    if cli_db.exists():
+        return cli_db
+    src_db = Path(__file__).resolve().parent.parent / "kanji.db"
+    if src_db.exists():
+        return src_db
+    return cli_db
+
+
+DATABASE = _resolve_db_path()
 
 
 def get_connection():
@@ -26,9 +40,15 @@ def initialize_database():
             kunyomi TEXT,
             level TEXT,
             strokes INTEGER,
-            grade INTEGER
+            grade INTEGER,
+            frequency INTEGER
         )
     """)
+
+    try:
+        cursor.execute("ALTER TABLE kanji ADD COLUMN frequency INTEGER")
+    except sqlite3.OperationalError:
+        pass
 
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS vocabulary (
@@ -67,22 +87,23 @@ def initialize_database():
     connection.close()
 
 
-def add_kanji(character, meaning, onyomi=None, kunyomi=None, level=None, strokes=None, grade=None):
+def add_kanji(character, meaning, onyomi=None, kunyomi=None, level=None, strokes=None, grade=None, frequency=None):
     connection = get_connection()
 
     cursor = connection.cursor()
 
     cursor.execute("""
-        INSERT INTO kanji (character, meaning, onyomi, kunyomi, level, strokes, grade)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO kanji (character, meaning, onyomi, kunyomi, level, strokes, grade, frequency)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         ON CONFLICT(character) DO UPDATE SET
             meaning = excluded.meaning,
             onyomi = excluded.onyomi,
             kunyomi = excluded.kunyomi,
             level = excluded.level,
             strokes = excluded.strokes,
-            grade = excluded.grade
-    """, (character, meaning, onyomi, kunyomi, level, strokes, grade))
+            grade = excluded.grade,
+            frequency = excluded.frequency
+    """, (character, meaning, onyomi, kunyomi, level, strokes, grade, frequency))
 
     connection.commit()
 
@@ -137,7 +158,7 @@ def get_all_kanji():
     connection = get_connection()
 
     rows = connection.execute("""
-        SELECT id, character, meaning, onyomi, kunyomi, level, strokes, grade
+        SELECT id, character, meaning, onyomi, kunyomi, level, strokes, grade, frequency
         FROM kanji
         ORDER BY character
     """).fetchall()
@@ -207,23 +228,36 @@ def save_srs_card(item_type, item_id, card):
     connection.close()
 
 
-# review section
+# review & deck section
 def get_kanji_by_level(level):
     connection = get_connection()
 
-    if level == "All":
+    level_str = str(level).strip() if level else "All"
+
+    if level_str == "All":
         rows = connection.execute("""
-            SELECT id, character, meaning, onyomi, kunyomi, level, strokes, grade
+            SELECT id, character, meaning, onyomi, kunyomi, level, strokes, grade, frequency
             FROM kanji
             ORDER BY character
         """).fetchall()
+    elif level_str.startswith("Top "):
+        try:
+            rank_limit = int(level_str.replace("Top ", "").strip())
+        except ValueError:
+            rank_limit = 2500
+        rows = connection.execute("""
+            SELECT id, character, meaning, onyomi, kunyomi, level, strokes, grade, frequency
+            FROM kanji
+            WHERE frequency IS NOT NULL AND frequency <= ?
+            ORDER BY frequency ASC
+        """, (rank_limit,)).fetchall()
     else:
         rows = connection.execute("""
-            SELECT id, character, meaning, onyomi, kunyomi, level, strokes, grade
+            SELECT id, character, meaning, onyomi, kunyomi, level, strokes, grade, frequency
             FROM kanji
             WHERE level = ?
             ORDER BY character
-        """, (level,)).fetchall()
+        """, (level_str,)).fetchall()
 
     connection.close()
     return rows
@@ -239,3 +273,35 @@ def get_all_srs_cards():
 
     connection.close()
     return rows
+
+
+def clear_srs_cards():
+    connection = get_connection()
+    connection.execute("DELETE FROM srs_cards")
+    connection.commit()
+    connection.close()
+
+
+def get_kanji_counts():
+    connection = get_connection()
+    rows = connection.execute("""
+        SELECT level, COUNT(*) as count
+        FROM kanji
+        GROUP BY level
+    """).fetchall()
+    total = connection.execute("SELECT COUNT(*) FROM kanji").fetchone()[0]
+
+    counts = {"All": total}
+    for row in rows:
+        if row["level"]:
+            counts[row["level"]] = row["count"]
+
+    for tier in [250, 500, 1000, 2500]:
+        tier_count = connection.execute("""
+            SELECT COUNT(*) FROM kanji
+            WHERE frequency IS NOT NULL AND frequency <= ?
+        """, (tier,)).fetchone()[0]
+        counts[f"Top {tier}"] = tier_count
+
+    connection.close()
+    return counts

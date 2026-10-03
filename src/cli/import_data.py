@@ -1,17 +1,24 @@
-# run only once
-# imports kanji material 
 
 import json
 import sys
 import urllib.request
 
-from database import (
-    initialize_database,
-    add_kanji,
-    add_vocabulary,
-    add_example,
-    get_all_kanji,
-)
+try:
+    from database import (
+        initialize_database,
+        add_kanji,
+        add_vocabulary,
+        add_example,
+        get_all_kanji,
+    )
+except ImportError:
+    from .database import (
+        initialize_database,
+        add_kanji,
+        add_vocabulary,
+        add_example,
+        get_all_kanji,
+    )
 
 
 BASE_URL = "https://raw.githubusercontent.com/evanclan/OpenJLPT/main/data/json"
@@ -38,6 +45,7 @@ def import_kanji(data):
             level=entry.get("level"),
             strokes=entry.get("strokes"),
             grade=entry.get("grade"),
+            frequency=entry.get("freq"),
         )
 
         imported += 1
@@ -98,39 +106,43 @@ def import_vocabulary(data):
     return imported, example_count
 
 
-def main():
-    level = sys.argv[1].lower() if len(sys.argv) > 1 else "n5"
-
-    if level not in ("n5", "n4"):
-        print("usage: python import_data.py [n5|n4]")
-        return
-
-    initialize_database()
-
+def import_single_level(level):
     kanji_url = f"{BASE_URL}/kanji/{level}.json"
     vocabulary_url = f"{BASE_URL}/vocab/{level}.json"
 
     print(f"Importing {level.upper()}...")
-    print()
-
     kanji_data = download_json(kanji_url)
     vocabulary_data = download_json(vocabulary_url)
 
-    print(f"kanji found:       {len(kanji_data)}")
-    print(f"vocabulary found:  {len(vocabulary_data)}")
-    print()
+    print(f"  kanji found:       {len(kanji_data)}")
+    print(f"  vocabulary found:  {len(vocabulary_data)}")
 
     kanji_count = import_kanji(kanji_data)
+    vocabulary_count, example_count = import_vocabulary(vocabulary_data)
 
-    print(f"imported kanji:       {kanji_count}")
-
-    vocabulary_count, example_count = import_vocabulary(
-        vocabulary_data
-    )
-
-    print(f"imported vocabulary:  {vocabulary_count}")
-    print(f"imported examples:    {example_count}")
+    print(f"  imported kanji:       {kanji_count}")
+    print(f"  imported vocabulary:  {vocabulary_count}")
+    print(f"  imported examples:    {example_count}")
     print()
+
+
+def main():
+    levels = ["n5", "n4", "n3", "n2", "n1"]
+    arg = sys.argv[1].lower() if len(sys.argv) > 1 else "all"
+
+    if arg == "all":
+        target_levels = levels
+    elif arg in levels:
+        target_levels = [arg]
+    else:
+        print("usage: python import_data.py [n5|n4|n3|n2|n1|all]")
+        return
+
+    initialize_database()
+
+    for lvl in target_levels:
+        import_single_level(lvl)
+
     print("done")
 
 

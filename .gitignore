@@ -1,9 +1,22 @@
 # python
 __pycache__/
-*.pyc
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
 
-# environment
+# virtual environment
 .venv/
+env/
+venv/
 
 # local database
-src/kanji.db
+src/cli/kanji.db
+*.db
+
+# ide & os
+.DS_Store
+*.swp
+*~
+.idea/
+.vscode/
