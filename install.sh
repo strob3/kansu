@@ -39,9 +39,7 @@ fi
 
 INSTALL_DIR="$HOME/.local/bin"
 
-echo "=========================================="
 echo "Installing Kansu (CLI Version)..."
-echo "=========================================="
 echo "Location: $PROJECT_DIR"
 
 # locate python3
@@ -147,19 +145,15 @@ if [ -n "$ZSH_VERSION" ]; then
 fi
 
 echo
-echo "=========================================="
 echo "Kansu CLI installed successfully."
-echo "=========================================="
 echo "Executable located at: $WRAPPER_PATH"
 
 # check if 'kansu' resolves in current environment
 if command -v kansu >/dev/null 2>&1; then
     echo
-    echo "You can launch Kansu anytime by typing:"
+    echo "You can launch Kansu by typing:"
     echo "  kansu"
 else
     echo
-    echo "Note: To make 'kansu' available in your current terminal session, run:"
-    echo "  export PATH=\"\$HOME/.local/bin:\$PATH\""
-    echo "Or start a new terminal session."
+    echo "Restart current terminal session."
 fi

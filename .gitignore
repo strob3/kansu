@@ -20,3 +20,6 @@ src/cli/kanji.db
 *~
 .idea/
 .vscode/
+pref/
+.codegraph/
+dump/

@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="src/web/assets/logo.svg" width="140" alt="Kansu logo">
+  <img src="src/web/public/assets/logo.svg" width="140" alt="Kansu logo">
   <h1>
     Kansu (カンス)
   </h1>
@@ -54,7 +54,7 @@ kansu
 | Shortcut | Context | Action |
 | :--- | :--- | :--- |
 | `↑` / `↓` or `k` / `j` | Menu | Navigate menu options |
-| `1` - `5` | Menu | Directly open option 1 to 5 |
+| `1` - `6` | Menu | Directly open option 1 to 6 |
 | `Enter` | Menu / Forms | Select menu item / Submit quiz answer |
 | `←` / `→` or `h` / `l` | Study Mode | Previous / Next kanji card |
 | `1`, `2`, `3`, `4` | Quiz Result | Rate card: `[1] Again`, `[2] Hard`, `[3] Good`, `[4] Easy` |
@@ -62,9 +62,10 @@ kansu
 
 ## Roadmap (planned features)
 
-- Quick kanji search & dictionary explorer (Ctrl+K / /)
+- [x] Quick kanji search (Ctrl+K / /)
+- [x] Dictionary explorer with level filter
 - Reading quiz mode & romaji-to-kana auto-transliteration
-- SRS progress backup & restore (JSON Export / Import)
+- [x] SRS progress backup & restore (JSON Export / Import)
 - Study streak & daily review tracker
 - Animated kanji stroke order
 - Backend feature overhaul including:
@@ -86,3 +87,4 @@ The OpenJLPT-derived data included in Kansu is licensed under
 [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/).
 
 See [NOTICE.md](NOTICE.md) for attribution and upstream data sources.
+

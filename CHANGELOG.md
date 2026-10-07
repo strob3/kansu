@@ -1,16 +1,26 @@
-# Changelog
+## [1.2.0] - 2026-10-08
 
-All notable changes to this project will be documented in this file.
+### Added
+- **Web Svelte 5 & TypeScript**: Rebuilt web application using Svelte 5 runes, TypeScript, and Tailwind CSS v4.
+- **Grid Dashboard**: Implemented bento grid style layout.
+- **Dictionary Explorer**: Added dictionary to easily explore all kanji.
+- **Command Palette**: Search kanji characters, English meanings, and On/Kun readings via `Ctrl+K` or `/` with direct card jump.
+- **Data**: JSON backup export and import for FSRS card states.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+### Changed
+- **Quick Select 1–6**: Assigned shortcut key 6 to Settings on menu screen; updated hotkey bar to display 1–6.
+- **Topbar Refinement**: Removed level status dot and search keybind badge, aligned search pill height with navigation bar, and updated tab ordering to Menu > Study > Quiz > Review > Dictionary > Settings.
+- **Hotkey Bar**: Dynamic footer keyboard shortcuts reflecting only actions applicable to the active screen.
+- **Theme Switcher**: Replaced 3-button theme selector with animated 2-state toggle switch.
+- **Color Palette**: Implemented zen design system palette across kansu.
+- **Logo**: Recolored logo SVG to website forest green palette.
 
 ## [1.1.0] - 2026-10-03
 
 ### Added
 - **1-Line CLI Curl Installation**: Direct installation via `curl -fsSL https://raw.githubusercontent.com/strob3/kansu/main/install.sh | bash` with automatic fallback to standard XDG data directory (`~/.local/share/kansu`).
 - **Dynamic Module Resolution**: Configured `sys.path` dynamically in `src/main.py` so `kansu` can be invoked from any working directory.
-- **Offline Resilience**: Optimized database provisioning in `install.sh` to verify existing records in `src/kanji.db` before attempting remote downloads, avoiding network timeouts when offline.
+- **Offline Resilience**: Optimized database provisioning in `install.sh` to verify existing records in `src/kanji.db` before attempting remote downloads.
 
 ### Changed
 - **Installer Overhaul (`install.sh`)**:
