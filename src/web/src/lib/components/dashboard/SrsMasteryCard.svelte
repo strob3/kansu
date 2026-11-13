@@ -19,9 +19,6 @@
         <span class="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-[#E8EFE9] text-[#273B2E] border border-[#D2DDD4] dark:bg-[#232C26] dark:text-[#7A9A83] dark:border-[#334137]">
           {stats.retentionRate}% Retained
         </span>
-        <span class="px-2 py-0.5 rounded text-[10px] font-mono font-medium bg-[#F4F2EC] text-[#50514F] border border-[#DFD7C5] dark:bg-[#252A27] dark:text-[#8E8D84] dark:border-[#2F332F]">
-          FSRS-v5
-        </span>
       </div>
     </div>
 

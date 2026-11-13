@@ -27,14 +27,11 @@
           5
         </span>
       </div>
-      <span class="text-xs font-mono uppercase tracking-wider text-[#1A1C1A]/60 dark:text-[#6E736E]">
-        {allKanji.length} Kanji Catalog
-      </span>
     </div>
 
     <!-- title & desc -->
     <h3 class="text-xl sm:text-2xl font-bold tracking-tight text-[#1A1C1A] dark:text-[#EAE6DE] flex items-baseline gap-2 mb-1">
-      Dictionary <span class="text-base font-normal text-[#1A1C1A]/60 dark:text-[#6E736E]">「辞書」</span>
+      Dictionary
     </h3>
     <p class="text-xs sm:text-sm text-[#50514F] dark:text-[#9E9D95] mb-4 leading-relaxed max-w-xl">
       Browse complete kanji catalog across all JLPT levels with instant search, stroke counts, and readings.

@@ -24,14 +24,11 @@
           1
         </span>
       </div>
-      <span class="text-xs font-mono uppercase tracking-wider text-[#1A1C1A]/60 dark:text-[#6E736E]">
-        {count} Kanji Loaded
-      </span>
     </div>
 
     <!-- main title & desc -->
     <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-[#1A1C1A] dark:text-[#EAE6DE] flex items-baseline gap-2 mb-2">
-      Study Mode <span class="text-base sm:text-lg font-normal text-[#1A1C1A]/60 dark:text-[#6E736E]">「学習」</span>
+      Study
     </h2>
     <p class="text-sm text-[#50514F] dark:text-[#9E9D95] max-w-lg mb-6 leading-relaxed">
       Browse kanji, onyomi & kunyomi readings, stroke orders, and high-frequency contextual vocabulary.

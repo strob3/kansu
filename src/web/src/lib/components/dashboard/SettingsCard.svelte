@@ -1,6 +1,6 @@
 <script lang="ts">
   import { appState } from '../../stores/app.svelte';
-  import { ChevronRight } from '@lucide/svelte';
+  import { ArrowRight } from '@lucide/svelte';
 </script>
 
 <div
@@ -28,8 +28,10 @@
   </div>
 
   <!-- bottom link -->
-  <div class="pt-4 mt-4 flex items-center justify-between text-xs text-[#1A1C1A] dark:text-[#9E9D95] group-hover:underline dark:group-hover:text-[#EAE6DE] font-semibold">
-    <span>Open preferences</span>
-    <ChevronRight class="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
+  <div class="pt-4 mt-4 flex items-center justify-between text-xs text-[#50514F] dark:text-[#8E8D84] font-semibold">
+    <div class="inline-flex items-center gap-1.5 text-[#273B2E] dark:text-[#7A9A83] group-hover:underline transition-transform">
+      <span>Open settings</span>
+      <ArrowRight class="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
+    </div>
   </div>
 </div>
